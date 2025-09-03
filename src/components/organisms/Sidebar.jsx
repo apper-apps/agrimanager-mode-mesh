@@ -1,8 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
+import { AuthContext } from "../../App";
 
+const LogoutButton = () => {
+  const { logout } = useContext(AuthContext);
+  
+  return (
+    <button
+      onClick={logout}
+      className="flex items-center px-2 py-1 text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
+      title="Logout"
+    >
+      <ApperIcon name="LogOut" className="w-4 h-4" />
+    </button>
+  );
+};
 const Sidebar = ({ isOpen, onClose }) => {
 const navItems = [
     { name: "Dashboard", icon: "BarChart3", path: "/" },
@@ -50,10 +64,13 @@ const navItems = [
         </ul>
       </nav>
       
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center text-white/70 text-sm">
-          <ApperIcon name="User" className="w-4 h-4 mr-2" />
-          <span>Farm Owner</span>
+<div className="p-4 border-t border-white/10">
+        <div className="flex items-center justify-between text-white/70 text-sm">
+          <div className="flex items-center">
+            <ApperIcon name="User" className="w-4 h-4 mr-2" />
+            <span>Farm Owner</span>
+          </div>
+          <LogoutButton />
         </div>
       </div>
     </div>

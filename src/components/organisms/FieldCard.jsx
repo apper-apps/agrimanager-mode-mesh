@@ -89,7 +89,7 @@ const getFieldStatusColor = (status) => {
         </div>
 <span className={cn(
           "px-2 py-1 rounded-full text-xs font-medium capitalize",
-          getFieldStatusColor(field.status)
+getFieldStatusColor(field.status)
         )}>
           {field.status}
         </span>
@@ -98,7 +98,7 @@ const getFieldStatusColor = (status) => {
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="flex items-center text-sm text-gray-600">
           <ApperIcon name="Maximize" className="w-4 h-4 mr-2 text-primary-500" />
-          <span>{field.sizeInAcres} acres</span>
+<span>{field.sizeInAcres} acres</span>
         </div>
         <div className="flex items-center text-sm text-gray-600">
           <ApperIcon name="Calendar" className="w-4 h-4 mr-2 text-primary-500" />

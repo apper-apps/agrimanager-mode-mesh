@@ -1,128 +1,481 @@
-import pestObservationsData from '@/services/mockData/pestObservations.json';
-
 class PestMonitoringService {
   constructor() {
-    this.observations = [...pestObservationsData];
-    this.nextId = Math.max(...this.observations.map(o => o.Id), 0) + 1;
-  }
-
-  async delay(ms = 300) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    // Initialize ApperClient with Project ID and Public Key
+    const { ApperClient } = window.ApperSDK;
+    this.apperClient = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
   }
 
   async getAll() {
-    await this.delay();
-    return [...this.observations];
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "field_id_c" } },
+          { field: { Name: "crop_id_c" } },
+          { field: { Name: "pest_type_c" } },
+          { field: { Name: "category_c" } },
+          { field: { Name: "severity_level_c" } },
+          { field: { Name: "affected_area_c" } },
+          { field: { Name: "affected_area_unit_c" } },
+          { field: { Name: "observation_date_c" } },
+          { field: { Name: "description_c" } },
+          { field: { Name: "treatment_applied_c" } },
+          { field: { Name: "treatment_date_c" } },
+          { field: { Name: "treatment_cost_c" } },
+          { field: { Name: "status_c" } },
+          { field: { Name: "photos_c" } },
+          { field: { Name: "weather_conditions_c" } },
+          { field: { Name: "observed_by_c" } },
+          { field: { Name: "follow_up_required_c" } },
+          { field: { Name: "follow_up_date_c" } },
+          { field: { Name: "notes_c" } }
+        ],
+        orderBy: [
+          {
+            fieldName: "observation_date_c",
+            sorttype: "DESC"
+          }
+        ]
+      };
+
+      const response = await this.apperClient.fetchRecords("pest_observation_c", params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+
+      return (response.data || []).map(observation => ({
+        Id: observation.Id,
+        fieldId: observation.field_id_c?.Id || observation.field_id_c,
+        cropId: observation.crop_id_c?.Id || observation.crop_id_c,
+        pestType: observation.pest_type_c,
+        category: observation.category_c,
+        severityLevel: observation.severity_level_c,
+        affectedArea: observation.affected_area_c,
+        affectedAreaUnit: observation.affected_area_unit_c,
+        observationDate: observation.observation_date_c,
+        description: observation.description_c,
+        treatmentApplied: observation.treatment_applied_c,
+        treatmentDate: observation.treatment_date_c,
+        treatmentCost: observation.treatment_cost_c,
+        status: observation.status_c,
+        photos: observation.photos_c ? JSON.parse(observation.photos_c) : [],
+        weatherConditions: observation.weather_conditions_c,
+        observedBy: observation.observed_by_c,
+        followUpRequired: observation.follow_up_required_c,
+        followUpDate: observation.follow_up_date_c,
+        notes: observation.notes_c
+      }));
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error fetching pest observations:", error?.response?.data?.message);
+      } else {
+        console.error(error);
+      }
+      return [];
+    }
   }
 
   async getById(id) {
-    await this.delay();
-    const observation = this.observations.find(o => o.Id === parseInt(id));
-    if (!observation) {
-      throw new Error(`Observation with ID ${id} not found`);
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "field_id_c" } },
+          { field: { Name: "crop_id_c" } },
+          { field: { Name: "pest_type_c" } },
+          { field: { Name: "category_c" } },
+          { field: { Name: "severity_level_c" } },
+          { field: { Name: "affected_area_c" } },
+          { field: { Name: "affected_area_unit_c" } },
+          { field: { Name: "observation_date_c" } },
+          { field: { Name: "description_c" } },
+          { field: { Name: "treatment_applied_c" } },
+          { field: { Name: "treatment_date_c" } },
+          { field: { Name: "treatment_cost_c" } },
+          { field: { Name: "status_c" } },
+          { field: { Name: "photos_c" } },
+          { field: { Name: "weather_conditions_c" } },
+          { field: { Name: "observed_by_c" } },
+          { field: { Name: "follow_up_required_c" } },
+          { field: { Name: "follow_up_date_c" } },
+          { field: { Name: "notes_c" } }
+        ]
+      };
+
+      const response = await this.apperClient.getRecordById("pest_observation_c", id, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      const observation = response.data;
+      return {
+        Id: observation.Id,
+        fieldId: observation.field_id_c?.Id || observation.field_id_c,
+        cropId: observation.crop_id_c?.Id || observation.crop_id_c,
+        pestType: observation.pest_type_c,
+        category: observation.category_c,
+        severityLevel: observation.severity_level_c,
+        affectedArea: observation.affected_area_c,
+        affectedAreaUnit: observation.affected_area_unit_c,
+        observationDate: observation.observation_date_c,
+        description: observation.description_c,
+        treatmentApplied: observation.treatment_applied_c,
+        treatmentDate: observation.treatment_date_c,
+        treatmentCost: observation.treatment_cost_c,
+        status: observation.status_c,
+        photos: observation.photos_c ? JSON.parse(observation.photos_c) : [],
+        weatherConditions: observation.weather_conditions_c,
+        observedBy: observation.observed_by_c,
+        followUpRequired: observation.follow_up_required_c,
+        followUpDate: observation.follow_up_date_c,
+        notes: observation.notes_c
+      };
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error(`Error fetching pest observation with ID ${id}:`, error?.response?.data?.message);
+      } else {
+        console.error(error);
+      }
+      return null;
     }
-    return { ...observation };
   }
 
   async getByFieldId(fieldId) {
-    await this.delay();
-    return this.observations.filter(o => o.fieldId === parseInt(fieldId));
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "field_id_c" } },
+          { field: { Name: "crop_id_c" } },
+          { field: { Name: "pest_type_c" } },
+          { field: { Name: "category_c" } },
+          { field: { Name: "severity_level_c" } },
+          { field: { Name: "affected_area_c" } },
+          { field: { Name: "affected_area_unit_c" } },
+          { field: { Name: "observation_date_c" } },
+          { field: { Name: "description_c" } },
+          { field: { Name: "treatment_applied_c" } },
+          { field: { Name: "treatment_date_c" } },
+          { field: { Name: "treatment_cost_c" } },
+          { field: { Name: "status_c" } },
+          { field: { Name: "photos_c" } },
+          { field: { Name: "weather_conditions_c" } },
+          { field: { Name: "observed_by_c" } },
+          { field: { Name: "follow_up_required_c" } },
+          { field: { Name: "follow_up_date_c" } },
+          { field: { Name: "notes_c" } }
+        ],
+        where: [
+          {
+            FieldName: "field_id_c",
+            Operator: "EqualTo",
+            Values: [parseInt(fieldId)]
+          }
+        ],
+        orderBy: [
+          {
+            fieldName: "observation_date_c",
+            sorttype: "DESC"
+          }
+        ]
+      };
+
+      const response = await this.apperClient.fetchRecords("pest_observation_c", params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+
+      return (response.data || []).map(observation => ({
+        Id: observation.Id,
+        fieldId: observation.field_id_c?.Id || observation.field_id_c,
+        cropId: observation.crop_id_c?.Id || observation.crop_id_c,
+        pestType: observation.pest_type_c,
+        category: observation.category_c,
+        severityLevel: observation.severity_level_c,
+        affectedArea: observation.affected_area_c,
+        affectedAreaUnit: observation.affected_area_unit_c,
+        observationDate: observation.observation_date_c,
+        description: observation.description_c,
+        treatmentApplied: observation.treatment_applied_c,
+        treatmentDate: observation.treatment_date_c,
+        treatmentCost: observation.treatment_cost_c,
+        status: observation.status_c,
+        photos: observation.photos_c ? JSON.parse(observation.photos_c) : [],
+        weatherConditions: observation.weather_conditions_c,
+        observedBy: observation.observed_by_c,
+        followUpRequired: observation.follow_up_required_c,
+        followUpDate: observation.follow_up_date_c,
+        notes: observation.notes_c
+      }));
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error fetching pest observations by field:", error?.response?.data?.message);
+      } else {
+        console.error(error);
+      }
+      return [];
+    }
   }
 
   async create(observationData) {
-    await this.delay();
-    
-    const newObservation = {
-      Id: this.nextId++,
-      fieldId: parseInt(observationData.fieldId),
-      cropId: observationData.cropId ? parseInt(observationData.cropId) : null,
-      pestType: observationData.pestType,
-      category: observationData.category,
-      severityLevel: parseInt(observationData.severityLevel),
-      affectedArea: parseFloat(observationData.affectedArea),
-      affectedAreaUnit: observationData.affectedAreaUnit || 'acres',
-      observationDate: observationData.observationDate || new Date().toISOString(),
-      description: observationData.description,
-      treatmentApplied: observationData.treatmentApplied || null,
-      treatmentDate: observationData.treatmentDate || null,
-      treatmentCost: observationData.treatmentCost ? parseFloat(observationData.treatmentCost) : 0,
-      status: observationData.status || 'Active',
-      photos: observationData.photos || [],
-      weatherConditions: observationData.weatherConditions || '',
-      observedBy: observationData.observedBy || 'Farm Manager',
-      followUpRequired: observationData.followUpRequired || false,
-      followUpDate: observationData.followUpDate || null,
-      notes: observationData.notes || ''
-    };
+    try {
+      const params = {
+        records: [
+          {
+            Name: `${observationData.pestType} - ${observationData.category}`,
+            field_id_c: parseInt(observationData.fieldId),
+            crop_id_c: observationData.cropId ? parseInt(observationData.cropId) : null,
+            pest_type_c: observationData.pestType,
+            category_c: observationData.category,
+            severity_level_c: parseInt(observationData.severityLevel),
+            affected_area_c: parseFloat(observationData.affectedArea),
+            affected_area_unit_c: observationData.affectedAreaUnit || 'acres',
+            observation_date_c: observationData.observationDate || new Date().toISOString(),
+            description_c: observationData.description,
+            treatment_applied_c: observationData.treatmentApplied,
+            treatment_date_c: observationData.treatmentDate,
+            treatment_cost_c: observationData.treatmentCost ? parseFloat(observationData.treatmentCost) : null,
+            status_c: observationData.status || 'Active',
+            photos_c: observationData.photos ? JSON.stringify(observationData.photos) : null,
+            weather_conditions_c: observationData.weatherConditions,
+            observed_by_c: observationData.observedBy || 'Farm Manager',
+            follow_up_required_c: observationData.followUpRequired || false,
+            follow_up_date_c: observationData.followUpDate,
+            notes_c: observationData.notes
+          }
+        ]
+      };
 
-    this.observations.push(newObservation);
-    return { ...newObservation };
+      const response = await this.apperClient.createRecord("pest_observation_c", params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create pest observation ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          
+          failedRecords.forEach(record => {
+            record.errors?.forEach(error => {
+              throw new Error(`${error.fieldLabel}: ${error}`);
+            });
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        
+        const successfulRecords = response.results.filter(result => result.success);
+        return successfulRecords.map(result => ({
+          Id: result.data.Id,
+          fieldId: result.data.field_id_c,
+          cropId: result.data.crop_id_c,
+          pestType: result.data.pest_type_c,
+          category: result.data.category_c,
+          severityLevel: result.data.severity_level_c,
+          affectedArea: result.data.affected_area_c,
+          affectedAreaUnit: result.data.affected_area_unit_c,
+          observationDate: result.data.observation_date_c,
+          description: result.data.description_c,
+          treatmentApplied: result.data.treatment_applied_c,
+          treatmentDate: result.data.treatment_date_c,
+          treatmentCost: result.data.treatment_cost_c,
+          status: result.data.status_c,
+          photos: result.data.photos_c ? JSON.parse(result.data.photos_c) : [],
+          weatherConditions: result.data.weather_conditions_c,
+          observedBy: result.data.observed_by_c,
+          followUpRequired: result.data.follow_up_required_c,
+          followUpDate: result.data.follow_up_date_c,
+          notes: result.data.notes_c
+        }))[0];
+      }
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error creating pest observation:", error?.response?.data?.message);
+      } else {
+        console.error(error);
+      }
+      throw error;
+    }
   }
 
   async update(id, observationData) {
-    await this.delay();
-    
-    const index = this.observations.findIndex(o => o.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error(`Observation with ID ${id} not found`);
+    try {
+      const params = {
+        records: [
+          {
+            Id: parseInt(id),
+            Name: `${observationData.pestType} - ${observationData.category}`,
+            field_id_c: parseInt(observationData.fieldId),
+            crop_id_c: observationData.cropId ? parseInt(observationData.cropId) : null,
+            pest_type_c: observationData.pestType,
+            category_c: observationData.category,
+            severity_level_c: parseInt(observationData.severityLevel),
+            affected_area_c: parseFloat(observationData.affectedArea),
+            affected_area_unit_c: observationData.affectedAreaUnit || 'acres',
+            observation_date_c: observationData.observationDate,
+            description_c: observationData.description,
+            treatment_applied_c: observationData.treatmentApplied,
+            treatment_date_c: observationData.treatmentDate,
+            treatment_cost_c: observationData.treatmentCost ? parseFloat(observationData.treatmentCost) : null,
+            status_c: observationData.status,
+            photos_c: observationData.photos ? JSON.stringify(observationData.photos) : null,
+            weather_conditions_c: observationData.weatherConditions,
+            observed_by_c: observationData.observedBy,
+            follow_up_required_c: observationData.followUpRequired,
+            follow_up_date_c: observationData.followUpDate,
+            notes_c: observationData.notes
+          }
+        ]
+      };
+
+      const response = await this.apperClient.updateRecord("pest_observation_c", params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to update pest observation ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          
+          failedRecords.forEach(record => {
+            record.errors?.forEach(error => {
+              throw new Error(`${error.fieldLabel}: ${error}`);
+            });
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        
+        const successfulRecords = response.results.filter(result => result.success);
+        return successfulRecords.map(result => ({
+          Id: result.data.Id,
+          fieldId: result.data.field_id_c,
+          cropId: result.data.crop_id_c,
+          pestType: result.data.pest_type_c,
+          category: result.data.category_c,
+          severityLevel: result.data.severity_level_c,
+          affectedArea: result.data.affected_area_c,
+          affectedAreaUnit: result.data.affected_area_unit_c,
+          observationDate: result.data.observation_date_c,
+          description: result.data.description_c,
+          treatmentApplied: result.data.treatment_applied_c,
+          treatmentDate: result.data.treatment_date_c,
+          treatmentCost: result.data.treatment_cost_c,
+          status: result.data.status_c,
+          photos: result.data.photos_c ? JSON.parse(result.data.photos_c) : [],
+          weatherConditions: result.data.weather_conditions_c,
+          observedBy: result.data.observed_by_c,
+          followUpRequired: result.data.follow_up_required_c,
+          followUpDate: result.data.follow_up_date_c,
+          notes: result.data.notes_c
+        }))[0];
+      }
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error updating pest observation:", error?.response?.data?.message);
+      } else {
+        console.error(error);
+      }
+      throw error;
     }
-
-    const updatedObservation = {
-      ...this.observations[index],
-      ...observationData,
-      Id: parseInt(id), // Preserve original ID
-      fieldId: parseInt(observationData.fieldId),
-      cropId: observationData.cropId ? parseInt(observationData.cropId) : null,
-      severityLevel: parseInt(observationData.severityLevel),
-      affectedArea: parseFloat(observationData.affectedArea),
-      treatmentCost: observationData.treatmentCost ? parseFloat(observationData.treatmentCost) : 0
-    };
-
-    this.observations[index] = updatedObservation;
-    return { ...updatedObservation };
   }
 
   async delete(id) {
-    await this.delay();
-    
-    const index = this.observations.findIndex(o => o.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error(`Observation with ID ${id} not found`);
-    }
+    try {
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
 
-    const deletedObservation = this.observations.splice(index, 1)[0];
-    return { ...deletedObservation };
+      const response = await this.apperClient.deleteRecord("pest_observation_c", params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to delete pest observation ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          
+          failedRecords.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        
+        return response.results.filter(result => result.success).length === 1;
+      }
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error deleting pest observation:", error?.response?.data?.message);
+      } else {
+        console.error(error);
+      }
+      throw error;
+    }
   }
 
   async getStats() {
-    await this.delay();
-    
-    const totalObservations = this.observations.length;
-    const activeIssues = this.observations.filter(o => o.status === 'Active').length;
-    const resolvedIssues = this.observations.filter(o => o.status === 'Resolved').length;
-    const monitoringIssues = this.observations.filter(o => o.status === 'Monitoring').length;
-    
-    const avgSeverity = totalObservations > 0 
-      ? Math.round((this.observations.reduce((sum, o) => sum + o.severityLevel, 0) / totalObservations) * 10) / 10
-      : 0;
+    try {
+      const observations = await this.getAll();
+      
+      const totalObservations = observations.length;
+      const activeIssues = observations.filter(o => o.status === 'Active').length;
+      const resolvedIssues = observations.filter(o => o.status === 'Resolved').length;
+      const monitoringIssues = observations.filter(o => o.status === 'Monitoring').length;
+      
+      const avgSeverity = totalObservations > 0 
+        ? Math.round((observations.reduce((sum, o) => sum + (o.severityLevel || 0), 0) / totalObservations) * 10) / 10
+        : 0;
 
-    const totalTreatmentCost = this.observations.reduce((sum, o) => sum + (o.treatmentCost || 0), 0);
-    const totalAffectedArea = this.observations.reduce((sum, o) => sum + o.affectedArea, 0);
+      const totalTreatmentCost = observations.reduce((sum, o) => sum + (o.treatmentCost || 0), 0);
+      const totalAffectedArea = observations.reduce((sum, o) => sum + (o.affectedArea || 0), 0);
 
-    return {
-      totalObservations,
-      activeIssues,
-      resolvedIssues,
-      monitoringIssues,
-      avgSeverity,
-      totalTreatmentCost: Math.round(totalTreatmentCost * 100) / 100,
-      totalAffectedArea: Math.round(totalAffectedArea * 10) / 10
-    };
+      return {
+        totalObservations,
+        activeIssues,
+        resolvedIssues,
+        monitoringIssues,
+        avgSeverity,
+        totalTreatmentCost: Math.round(totalTreatmentCost * 100) / 100,
+        totalAffectedArea: Math.round(totalAffectedArea * 10) / 10
+      };
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error calculating pest monitoring stats:", error?.response?.data?.message);
+      } else {
+        console.error(error);
+      }
+      return {
+        totalObservations: 0,
+        activeIssues: 0,
+        resolvedIssues: 0,
+        monitoringIssues: 0,
+        avgSeverity: 0,
+        totalTreatmentCost: 0,
+        totalAffectedArea: 0
+      };
+    }
   }
 
   async getPestTypes() {
-    await this.delay();
-    
+    // Return static data for pest types - this doesn't need to be dynamic from database
     const pestTypes = [
       { category: 'Pest', types: ['Aphids', 'Cutworm', 'Corn Borer', 'Thrips', 'Spider Mites', 'Whiteflies', 'Caterpillars', 'Beetles'] },
       { category: 'Disease', types: ['Powdery Mildew', 'Leaf Spot', 'Rust', 'Blight', 'Root Rot', 'Wilt', 'Mosaic Virus', 'Anthracnose'] },
@@ -132,5 +485,8 @@ class PestMonitoringService {
     return pestTypes;
   }
 }
+
+const pestMonitoringService = new PestMonitoringService();
+export default pestMonitoringService;
 
 export default new PestMonitoringService();
