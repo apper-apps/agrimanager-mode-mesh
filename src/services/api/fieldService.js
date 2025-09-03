@@ -230,14 +230,15 @@ class FieldService {
   }
 
   async getIrrigationStats(fieldId) {
-    try {
+try {
       // This could fetch irrigation stats for the field from irrigation_record_c table
       // For now, return default structure
-      return {
+      const defaultStats = {
         totalIrrigations: 0,
         totalWaterUsed: 0,
         lastIrrigation: null
       };
+      return defaultStats;
     } catch (error) {
       if (error?.response?.data?.message) {
         console.error("Error calculating irrigation stats:", error?.response?.data?.message);
