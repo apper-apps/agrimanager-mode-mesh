@@ -357,4 +357,3 @@ class PlantingRecordService {
 
 const plantingRecordService = new PlantingRecordService();
 export default plantingRecordService;
-export default plantingRecordService;

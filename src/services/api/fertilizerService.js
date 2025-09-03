@@ -400,5 +400,3 @@ class FertilizerService {
 
 const fertilizerService = new FertilizerService();
 export default fertilizerService;
-
-export default new FertilizerService();

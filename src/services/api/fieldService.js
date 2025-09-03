@@ -315,7 +315,6 @@ class FieldService {
     }
   }
 }
-}
 
 const fieldService = new FieldService();
 export default fieldService;

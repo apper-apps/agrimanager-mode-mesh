@@ -488,5 +488,3 @@ class PestMonitoringService {
 
 const pestMonitoringService = new PestMonitoringService();
 export default pestMonitoringService;
-
-export default new PestMonitoringService();
